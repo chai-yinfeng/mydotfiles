@@ -1,0 +1,7 @@
+[user]
+	name = black magic
+	email = 1291999873@qq.com
+[init]
+	defaultBranch = main
+[pull]
+	rebase = false
