@@ -1,0 +1,81 @@
+# Use a clean two-line prompt.
+add_newline = true
+
+format = """
+$username$hostname$directory$git_branch$git_status
+$character
+"""
+
+# Show username only when useful.
+[username]
+style_user = "bold green"
+style_root = "bold red"
+format = "[$user]($style) "
+show_always = false
+
+# Show hostname for remote sessions.
+[hostname]
+ssh_only = true
+format = "on [$hostname](bold blue) "
+trim_at = "."
+disabled = false
+
+# Keep directory readable and not too long.
+[directory]
+style = "bold cyan"
+truncate_to_repo = true
+truncation_length = 3
+read_only = " 🔒"
+read_only_style = "red"
+
+# Show current git branch.
+[git_branch]
+symbol = " "
+style = "bold purple"
+format = "on [$symbol$branch]($style) "
+
+# Show compact git status.
+[git_status]
+style = "red"
+format = '([\[$all_status$ahead_behind\]]($style))'
+conflicted = "="
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "?"
+stashed = "$"
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+# Prompt character for success / error / vi mode.
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vicmd_symbol = "[❮](bold yellow)"
+
+# Disable modules you likely do not want yet.
+[package]
+disabled = true
+
+[cmd_duration]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[python]
+disabled = true
+
+[rust]
+disabled = true
+
+[golang]
+disabled = true
+
+[c]
+disabled = true
+
+[java]
+disabled = true
