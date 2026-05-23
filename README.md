@@ -1,6 +1,6 @@
 # dotfiles
 
-Portable user-level configuration for my Arch Linux development environment.
+Portable user-level configuration for my Linux development environments.
 
 This repository is the source of truth for reusable shell, editor, terminal, and development workflow configuration.
 It is not intended to capture full machine provisioning, hardware drivers, host-specific networking, secrets, or other one-off local state.
@@ -30,7 +30,10 @@ It is not intended to capture full machine provisioning, hardware drivers, host-
 
 ## System baseline
 
-This configuration assumes an Arch Linux system with the following baseline already working:
+This configuration was started on Arch Linux and is also used from an Ubuntu arm64 virtual machine on VMware.
+The portable dotfiles should work across both environments, but package names and some tool install paths differ by distribution.
+
+The primary Arch desktop baseline assumes:
 
 - Arch Linux installed and bootable
 - NetworkManager installed, enabled, and functioning
@@ -40,6 +43,14 @@ This configuration assumes an Arch Linux system with the following baseline alre
 - a normal user account configured with sudo access
 - GitHub access configured
 - a dotfiles repository initialized and pushed to GitHub
+
+The Ubuntu VM baseline assumes:
+
+- Ubuntu arm64 installed and bootable under VMware
+- `apt` package management available
+- a normal user account configured with sudo access
+- GitHub access configured
+- development tools installed from a mix of `apt`, `npm`, `go install`, and `rustup`
 
 The repo focuses on the portable user-space layer that sits on top of that baseline.
 
@@ -110,6 +121,20 @@ An old local Oh My Zsh directory may still exist as a backup on some machines, b
 - plugins used only for clearly scoped functionality
 - configuration that remains understandable months later
 
+### Linux path compatibility
+The `zsh` configuration handles both common Arch and Ubuntu plugin locations:
+
+- Arch-style zsh plugins under `/usr/share/zsh/plugins/...`
+- Ubuntu/Debian-style zsh plugin files under `/usr/share/zsh-autosuggestions/...` and `/usr/share/zsh-syntax-highlighting/...`
+
+It also puts common user-level tool directories on `PATH`:
+
+- `$HOME/.local/bin`
+- `$HOME/go/bin`
+- `$HOME/.cargo/bin`
+
+These paths are required for tools installed by `pipx` or local scripts, `go install`, and `rustup`/`cargo`.
+
 ---
 
 ## Prompt and shell UX
@@ -166,6 +191,7 @@ Neovim is treated as a first-class part of the environment rather than a one-off
 - modern plugin management
 - portable config stored under the repo
 - editor behavior documented alongside shell and terminal configuration
+- explicit LSP setup for the languages currently used
 
 ### Current setup approach
 The environment is moving toward a `kickstart.nvim`-based configuration rather than a fully custom-from-scratch setup.
@@ -182,6 +208,26 @@ Reason:
 - strong search/navigation ergonomics
 - modern syntax and LSP support
 - minimal unnecessary complexity at the start
+
+### Current LSP and formatting coverage
+The active Neovim configuration enables these language servers:
+
+- `clangd` for C/C++, started with `--background-index` and `--clang-tidy`
+- `pyright` for Python
+- `rust_analyzer` for Rust, with checks routed through `clippy`
+- `gopls` for Go, with `gofumpt`, `staticcheck`, and extra analyses enabled
+- `lua_ls` for Lua and Neovim configuration editing
+
+Formatting is configured through `conform.nvim`:
+
+- Lua: `stylua`
+- Python: `isort`, `black`
+- Go: `goimports`, `gofumpt`
+- Rust: `rustfmt`
+- C/C++: `clang-format`, available manually; format-on-save is disabled for C/C++
+
+Mason is currently used conservatively to install `lua_ls` and `stylua`.
+The other language servers and formatters should be installed at the system or user-tool level so the same config works cleanly on Ubuntu arm64 and Arch.
 
 ---
 
@@ -219,10 +265,31 @@ It documents the tools expected to exist on a fresh system so the configuration 
 ### Editor and editor support
 - `neovim`
 - `gcc`
+- `make`
 - `nodejs`
 - `npm`
 - `python`
 - `python-pip`
+- `clang`
+- `clangd`
+- `clang-format`
+- `go`
+- `rustup`
+- `tree-sitter-cli`
+
+### Neovim language tooling
+- `lua-language-server`
+- `stylua`
+- `pyright`
+- `black`
+- `isort`
+- `gopls`
+- `goimports`
+- `gofumpt`
+- `staticcheck`
+- `rust-analyzer`
+- `rustfmt`
+- `clippy`
 
 ### Network and remote access
 - `networkmanager`
@@ -255,16 +322,59 @@ These are documented for environment reconstruction but are not part of the port
 
 ## Example package installation commands
 
-### Base user environment
+### Arch base user environment
 ```bash
 sudo pacman -Syu
 sudo pacman -S base-devel git curl wget zip unzip man-db man-pages
 sudo pacman -S zsh starship tmux zoxide zsh-autosuggestions zsh-syntax-highlighting
 sudo pacman -S neovim ripgrep fd fzf tree htop btop
-sudo pacman -S nodejs npm python python-pip gcc
+sudo pacman -S nodejs npm python python-pip gcc make clang rustup go tree-sitter-cli
 sudo pacman -S networkmanager openssh firefox
 sudo pacman -S noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-dejavu
 ```
+
+### Arch Neovim language tooling
+```bash
+sudo pacman -S lua-language-server stylua pyright python-black python-isort clang
+sudo pacman -S gopls gofumpt rust-analyzer
+go install golang.org/x/tools/cmd/goimports@latest
+go install honnef.co/go/tools/cmd/staticcheck@latest
+rustup component add clippy rustfmt
+```
+
+### Ubuntu arm64 VM base user environment
+```bash
+sudo apt update
+sudo apt install zsh git curl wget zip unzip build-essential
+sudo apt install tmux zoxide zsh-autosuggestions zsh-syntax-highlighting
+sudo apt install neovim ripgrep fd-find fzf tree htop btop
+sudo apt install nodejs npm python3 python3-pip python3-venv pipx
+sudo apt install clang clangd clang-format clang-tidy golang-go
+```
+
+Install `starship` from the distro package if available, or from the upstream installer when the Ubuntu repository does not provide a current package.
+
+On Ubuntu, `fd` is usually installed as `fdfind`.
+If a tool expects the `fd` command, add a user-local symlink:
+
+```bash
+mkdir -p "$HOME/.local/bin"
+ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
+```
+
+### Ubuntu arm64 Neovim language tooling
+```bash
+npm install -g pyright
+pipx install black
+pipx install isort
+go install golang.org/x/tools/gopls@latest
+go install golang.org/x/tools/cmd/goimports@latest
+go install mvdan.cc/gofumpt@latest
+go install honnef.co/go/tools/cmd/staticcheck@latest
+rustup component add rust-analyzer clippy rustfmt
+```
+
+The Ubuntu shell config already adds `$HOME/.local/bin`, `$HOME/go/bin`, and `$HOME/.cargo/bin` to `PATH`, which is why the user-level installs above are preferred for VM compatibility.
 
 ### Input method stack
 ```bash
@@ -331,7 +441,7 @@ Instead, it serves as:
 
 1. the canonical source for portable user-level config
 2. the reference list of packages and tools expected on the machine
-3. the rebuild checklist for recreating the development environment on a fresh Arch system
+3. the rebuild checklist for recreating the development environment on a fresh Linux system
 
 A typical rebuild flow is:
 
@@ -356,7 +466,7 @@ When adding or revising configuration:
 
 ## Summary
 
-This repository is the portable user-configuration layer for an Arch Linux development system.
+This repository is the portable user-configuration layer for Linux development systems, currently covering an Arch desktop and an Ubuntu arm64 VMware VM.
 
 It documents:
 - what is tracked
@@ -366,4 +476,3 @@ It documents:
 - how to rebuild the same user environment on another machine
 
 The repository should remain readable enough to function both as configuration storage and as operational documentation.
-

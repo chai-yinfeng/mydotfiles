@@ -1,5 +1,36 @@
 # kickstart.nvim
 
+## Local dotfiles notes
+
+This Neovim config is based on `kickstart.nvim`, with local changes for the current Arch desktop and Ubuntu arm64 VMware VM workflow.
+
+The local LSP setup currently enables:
+
+- `clangd` for C/C++, with background indexing and clang-tidy diagnostics
+- `pyright` for Python
+- `rust_analyzer` for Rust, with `clippy` checks
+- `gopls` for Go, with `gofumpt`, `staticcheck`, and additional analyses
+- `lua_ls` for Lua and Neovim configuration work
+
+Formatting is handled by `conform.nvim`:
+
+- Lua: `stylua`
+- Python: `isort`, `black`
+- Go: `goimports`, `gofumpt`
+- Rust: `rustfmt`
+- C/C++: `clang-format`, available manually; format-on-save is disabled for C/C++
+
+Mason only ensures `lua_ls` and `stylua` automatically.
+Install the other language servers and formatters through the system package manager or user-level language toolchains so the config remains portable across Arch and Ubuntu arm64.
+
+Expected user-level tool paths are configured in `zsh/.zshrc`:
+
+- `$HOME/.local/bin`
+- `$HOME/go/bin`
+- `$HOME/.cargo/bin`
+
+For the full package checklist, see the repository root `README.md`.
+
 ## Introduction
 
 A starting point for Neovim that is:
