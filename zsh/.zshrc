@@ -64,11 +64,28 @@ eval "$(starship init zsh)"
 # zsh-autosuggestions
 # Shows command suggestions based on history
 # -----------------------------
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+elif [ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
 
 # -----------------------------
 # zsh-syntax-highlighting
 # Highlights commands before execution
 # Keep this near the end of the file
 # -----------------------------
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+# User-local executables
+export PATH="$HOME/.local/bin:$PATH"
+
+# Go tools installed by `go install`
+export PATH="$HOME/go/bin:$PATH"
+
+# Rust tools installed by rustup/cargo
+export PATH="$HOME/.cargo/bin:$PATH"

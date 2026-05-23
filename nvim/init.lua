@@ -600,20 +600,36 @@ require('lazy').setup({
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        clangd = {
+          cmd = { 'clangd', '--background-index', '--clang-tidy' },
+        },
 
-        stylua = {}, -- Used to format Lua code
+        pyright = {},
 
-        -- Special Lua Config, as recommended by neovim help docs
+        rust_analyzer = {
+          settings = {
+            ['rust-analyzer'] = {
+              check = {
+                command = 'clippy',
+              },
+            },
+          },
+        },
+
+        gopls = {
+          settings = {
+            gopls = {
+              gofumpt = true,
+              staticcheck = true,
+              analyses = {
+                unusedparams = true,
+                unusedwrite = true,
+                shadow = true,
+              },
+            },
+          },
+        },
+
         lua_ls = {
           on_init = function(client)
             if client.workspace_folders then
@@ -624,12 +640,13 @@ require('lazy').setup({
             client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
               runtime = {
                 version = 'LuaJIT',
-                path = { 'lua/?.lua', 'lua/?/init.lua' },
+                path = {
+                  'lua/?.lua',
+                  'lua/?/init.lua',
+                },
               },
               workspace = {
                 checkThirdParty = false,
-                -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
-                --  See https://github.com/neovim/nvim-lspconfig/issues/3189
                 library = vim.tbl_extend('force', vim.api.nvim_get_runtime_file('', true), {
                   '${3rd}/luv/library',
                   '${3rd}/busted/library',
@@ -650,10 +667,11 @@ require('lazy').setup({
       --    :Mason
       --
       -- You can press `g?` for help in this menu.
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        -- You can add other tools here that you want Mason to install
-      })
+      -- local ensure_installed = vim.tbl_keys(servers or {})
+      local ensure_installed = {
+        'lua_ls',
+        'stylua',
+      }
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -696,11 +714,13 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        python = { 'isort', 'black' },
+        go = { 'goimports', 'gofumpt' },
+        rust = { 'rustfmt' },
+
+        -- not recommend to enable automatic formatting on save by default for C/C++; manually format the page when needed.
+        c = { 'clang-format' },
+        cpp = { 'clang-format' },
       },
     },
   },
@@ -875,7 +895,27 @@ require('lazy').setup({
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
       -- ensure basic parser are installed
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+      local parsers = {
+        'bash',
+        'c',
+        'cpp',
+        'diff',
+        'go',
+        'gomod',
+        'gosum',
+        'gowork',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'python',
+        'query',
+        'rust',
+        'toml',
+        'vim',
+        'vimdoc',
+      }
       require('nvim-treesitter').install(parsers)
 
       ---@param buf integer
