@@ -28,4 +28,4 @@ C/C++ format-on-save remains disabled. Use `<leader>cf` to format a C/C++ buffer
 
 ## File navigation
 
-Neo-tree is intentionally not enabled. Use LazyVim's search/picker workflow inside Neovim and Yazi from the terminal; Yazi configuration is maintained separately under `../yazi/`.
+Neo-tree is intentionally not enabled. Use `<leader>e` (Space, then `e` by default) to run Yazi at the LazyVim project root in a Snacks floating terminal; the terminal closes when Yazi exits and returns to Neovim. From Zsh, `y` uses the shell wrapper. Yazi configuration lives under `../yazi/`.
