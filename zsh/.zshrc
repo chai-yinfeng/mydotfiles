@@ -5,6 +5,23 @@ export EDITOR="nvim"
 export VISUAL="nvim"
 export PAGER="less"
 
+# Machine-specific settings live outside this repository.
+if [[ -r "$HOME/.zshrc.local" ]]; then
+  source "$HOME/.zshrc.local"
+fi
+
+# Yazi's wrapper returns the last directory to this shell.
+if command -v yazi >/dev/null 2>&1; then
+  function y() {
+    local tmp cwd
+    tmp="$(mktemp -t 'yazi-cwd.XXXXXX')" || return
+    command yazi "$@" --cwd-file="$tmp"
+    IFS= read -r -d '' cwd < "$tmp"
+    [[ "$cwd" != "$PWD" && -d "$cwd" ]] && builtin cd -- "$cwd" || builtin true
+    command rm -f -- "$tmp"
+  }
+fi
+
 # -----------------------------
 # History configuration
 # HISTFILE: where command history is stored
@@ -52,21 +69,27 @@ bindkey -e
 # A smarter directory jumper
 # Example: z project-name
 # -----------------------------
-eval "$(zoxide init zsh)"
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
 
 # -----------------------------
 # Starship prompt
 # Cross-shell prompt configuration
 # -----------------------------
-eval "$(starship init zsh)"
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
 # -----------------------------
 # zsh-autosuggestions
 # Shows command suggestions based on history
 # -----------------------------
-if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+if [[ -n "${HOMEBREW_PREFIX:-}" && -r "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
   source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-elif [ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+elif [[ -r /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
   source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
@@ -75,17 +98,17 @@ fi
 # Highlights commands before execution
 # Keep this near the end of the file
 # -----------------------------
-if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+if [[ -n "${HOMEBREW_PREFIX:-}" && -r "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
   source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-elif [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+elif [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
   source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
-# User-local executables
-export PATH="$HOME/.local/bin:$PATH"
-
-# Go tools installed by `go install`
-export PATH="$HOME/go/bin:$PATH"
-
-# Rust tools installed by rustup/cargo
-export PATH="$HOME/.cargo/bin:$PATH"
+# Add user-managed tool directories only when installed.
+typeset -U path
+for user_bin in "$HOME/.cargo/bin" "$HOME/go/bin" "$HOME/.local/bin"; do
+  [[ -d "$user_bin" ]] && path=("$user_bin" $path)
+done
+unset user_bin
