@@ -4,6 +4,8 @@ function M.parse(reference)
   reference = vim.trim(reference)
   reference = reference:match '^%[.-%]%((.*)%)$' or reference
   reference = reference:match '^`(.*)`$' or reference
+  -- Markdown prose may escape underscores in otherwise literal file paths.
+  reference = reference:gsub('\\_', '_')
   local file, line, column = reference:match '^(.-):(%d+):(%d+)$'
   if not file then
     file, line = reference:match '^(.-):(%d+)%-%d+$'

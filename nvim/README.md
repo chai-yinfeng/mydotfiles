@@ -44,6 +44,7 @@ Inside Neovim, use `:CodeLocation path/to/file.py:1626` or `<leader>fL`
 (Space, then `f`, then uppercase `L`) and paste the reference into the prompt.
 Backtick-wrapped references, Markdown links to local files, `path#L1626`, and
 line ranges such as `path:1626-1630` are supported; ranges jump to their start.
+Markdown-escaped underscores (`\_`) in pasted references are unescaped.
 Relative paths resolve against Neovim's current directory (`:pwd`); absolute
 paths work from anywhere. Web URLs require opening the repository locally first.
 
