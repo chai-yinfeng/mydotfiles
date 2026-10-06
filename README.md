@@ -184,6 +184,8 @@ Language extras are enabled in `nvim/lazyvim.json`: C/C++ (`clangd`), Go (`gopls
 
 Conform formats Lua with Stylua, Python with isort and Black, Go with goimports and gofumpt, and Rust with rustfmt. C/C++ uses clang-format on demand; format-on-save remains disabled for those filetypes.
 
+Markdown files render directly in the terminal with `render-markdown.nvim`, including over SSH. Toggle rendering with `<leader>um` (Space, then `u`, then `m`) or `:RenderMarkdown toggle`; no browser is required. See [Neovim notes](nvim/README.md) for editing behavior.
+
 Neo-tree is intentionally not enabled. Use LazyVim's pickers for search and `<leader>e` (Space, then `e` by default) to open Yazi in a Snacks floating terminal at the project root; it closes and returns to Neovim when Yazi exits.
 
 ---

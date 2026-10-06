@@ -26,6 +26,14 @@ Conform is configured for:
 
 C/C++ format-on-save remains disabled. Use `<leader>cf` to format a C/C++ buffer manually.
 
+## Markdown rendering
+
+Markdown files render inside the terminal with `render-markdown.nvim`. Use
+`<leader>um` (Space, then `u`, then `m`) or `:RenderMarkdown toggle` to toggle
+rendering. Insert mode and the cursor line show the source for editing.
+Treesitter's `markdown` and `markdown_inline` parsers come from LazyVim's core
+configuration. No browser is required.
+
 ## File navigation
 
 Neo-tree is intentionally not enabled. Use `<leader>e` (Space, then `e` by default) to run Yazi at the LazyVim project root in a Snacks floating terminal; the terminal closes when Yazi exits and returns to Neovim. From Zsh, `y` uses the shell wrapper. Yazi configuration lives under `../yazi/`.
