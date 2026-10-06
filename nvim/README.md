@@ -36,17 +36,21 @@ configuration. No browser is required.
 
 ## Code locations from Codex
 
-From a Zsh shell in the project directory, use `nv 'path/to/file.py:1626'` to
-open a file at the given line, or `nv 'path/to/file.py:1626:8'` for a column.
-Reload `~/.zshrc` after updating the shell configuration.
+Use Neovim's built-in commands; no custom location parser is configured:
 
-Inside Neovim, use `:CodeLocation path/to/file.py:1626` or `<leader>fL`
-(Space, then `f`, then uppercase `L`) and paste the reference into the prompt.
-Backtick-wrapped references, Markdown links to local files, `path#L1626`, and
-line ranges such as `path:1626-1630` are supported; ranges jump to their start.
-Markdown-escaped underscores (`\_`) in pasted references are unescaped.
-Relative paths resolve against Neovim's current directory (`:pwd`); absolute
-paths work from anywhere. Web URLs require opening the repository locally first.
+- From the shell: `nvim +1626 path/to/file.py`.
+- Inside Neovim: `:edit +1626 path/to/file.py`.
+- When `path/to/file.py:1626` appears in a buffer (including a terminal buffer),
+  place the cursor on the filename and press `gF` in Normal mode. `gf` opens the
+  file without using the line number. In a terminal buffer, first leave Terminal
+  mode with `<C-\\><C-n>`.
+
+For pasted references, use a scratch buffer (`:new`, then `:setlocal buftype=nofile
+bufhidden=wipe noswapfile`), paste the reference, press Escape, and use `gF` on
+the filename. Remove Markdown escape characters such as `\_` first. `:edit`
+does not interpret a `:line` suffix; use its `+line` argument instead. Relative
+paths depend on the current directory (`:pwd`); absolute paths avoid ambiguity.
+See `:help gF` and `:help +cmd` for the built-in behavior.
 
 ## Treesitter installation
 

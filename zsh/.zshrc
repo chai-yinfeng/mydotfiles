@@ -5,15 +5,6 @@ export EDITOR="nvim"
 export VISUAL="nvim"
 export PAGER="less"
 
-# Paste a code reference from Codex and open it at the indicated line/column.
-function nv() {
-  if (( $# != 1 )); then
-    print -u2 'Usage: nv "path:line[:column]"'
-    return 2
-  fi
-  NVIM_CODE_LOCATION="$1" command nvim '+CodeLocation'
-}
-
 # Machine-specific settings live outside this repository.
 if [[ -r "$HOME/.zshrc.local" ]]; then
   source "$HOME/.zshrc.local"
