@@ -16,6 +16,7 @@ It is not intended to capture full machine provisioning, hardware drivers, host-
 - `tmux`
 - `neovim`
 - `yazi`
+- Codex global working preferences
 
 ### Explicitly excluded from this repository
 - GPU drivers
@@ -71,11 +72,34 @@ Current or intended tracked files:
 - `tmux/.tmux.conf`
 - `nvim/`
 - `yazi/`
+- `codex/AGENTS.md`
 
 The exact directory layout may evolve, but the boundary remains the same:
 portable user configuration belongs here, machine-local operational state does not.
 
 The managed `~/.zshrc` links to `zsh/.zshrc` and optionally sources `~/.zshrc.local`. Link `nvim/` to `~/.config/nvim` and `yazi/` to `~/.config/yazi`; keep host-specific settings outside this repository.
+
+## Codex working preferences
+
+`codex/AGENTS.md` contains reusable working agreements: discuss code changes
+before implementation, prefer existing capabilities, follow upstream conventions,
+keep commits focused, update relevant documentation, and restrict public uploads
+and pushes. The owner's personal GitHub repositories are an explicit exception
+for authorized task changes; upstream repositories are not.
+
+Link this file to Codex's global instruction path (adjust the source path if the
+repository is elsewhere):
+
+```bash
+mkdir -p ~/.codex
+ln -s ~/mydotfiles/codex/AGENTS.md ~/.codex/AGENTS.md
+```
+
+If global instructions already exist, merge them before linking. Restart Codex to
+load the new instructions. Keep project-specific build commands, tests, and
+architecture guidance in each repository's own `AGENTS.md`. If `CODEX_HOME` is
+customized, use its directory instead of `~/.codex`. A non-empty
+`AGENTS.override.md` there takes precedence over `AGENTS.md`.
 
 ---
 
