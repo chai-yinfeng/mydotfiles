@@ -17,6 +17,7 @@ It is not intended to capture full machine provisioning, hardware drivers, host-
 - `neovim`
 - `yazi`
 - macOS package declarations in `Brewfile`
+- Codex global working preferences
 
 ### Explicitly excluded from this repository
 - GPU drivers
@@ -76,6 +77,7 @@ Current or intended tracked files:
 - `yazi/`
 - `bat/`
 - `Brewfile` (macOS package manifest, not a configuration symlink)
+- `codex/AGENTS.md`
 
 The exact directory layout may evolve, but the boundary remains the same:
 portable user configuration belongs here, machine-local operational state does not.
@@ -85,6 +87,28 @@ The managed `~/.zshrc` links to `zsh/.zshrc` and optionally sources `~/.zshrc.lo
 Track intentional configuration overrides, not copies of upstream defaults. Yazi's small configuration preserves the deliberate choice to show hidden files. `bat/config` selects Tokyo Night Moon (`tokyonight_moon`), automatic paging, and the full display style. `eza` continues to use its defaults.
 
 The configured `tokyonight_moon` bat theme is the unmodified [Tokyo Night Sublime export](https://github.com/folke/tokyonight.nvim/blob/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/sublime/tokyonight_moon.tmTheme), stored under `bat/themes/` with its upstream license. After linking `bat/` on a new machine, build the local cache with `bat cache --build` before using the custom default theme. Run `bat zsh/.zshrc` from the repository root to preview the configured defaults. Generated theme caches stay outside the repository.
+
+## Codex working preferences
+
+`codex/AGENTS.md` contains reusable working agreements: discuss code changes
+before implementation, prefer existing capabilities, follow upstream conventions,
+keep commits focused, update relevant documentation, and restrict public uploads
+and pushes. The owner's personal GitHub repositories are an explicit exception
+for authorized task changes; upstream repositories are not.
+
+Link this file to Codex's global instruction path (adjust the source path if the
+repository is elsewhere):
+
+```bash
+mkdir -p ~/.codex
+ln -s ~/mydotfiles/codex/AGENTS.md ~/.codex/AGENTS.md
+```
+
+If global instructions already exist, merge them before linking. Restart Codex to
+load the new instructions. Keep project-specific build commands, tests, and
+architecture guidance in each repository's own `AGENTS.md`. If `CODEX_HOME` is
+customized, use its directory instead of `~/.codex`. A non-empty
+`AGENTS.override.md` there takes precedence over `AGENTS.md`.
 
 ---
 
@@ -194,6 +218,10 @@ The repository's `nvim/` directory contains a LazyVim Starter-based configuratio
 Language extras are enabled in `nvim/lazyvim.json`: C/C++ (`clangd`), Go (`gopls`), Python (Pyright and Ruff), and Rust (rust-analyzer with Clippy). Lua support comes from LazyVim core. Mason installs configured language servers and selected formatters; Rust tools remain managed by the Rust toolchain.
 
 Conform formats Lua with Stylua, Python with isort and Black, Go with goimports and gofumpt, and Rust with rustfmt. C/C++ uses clang-format on demand; format-on-save remains disabled for those filetypes.
+
+Markdown files render directly in the terminal with `render-markdown.nvim`, including over SSH. Toggle rendering with `<leader>um` (Space, then `u`, then `m`) or `:RenderMarkdown toggle`; no browser is required. See [Neovim notes](nvim/README.md) for editing behavior.
+
+Open code references from Codex with Neovim's built-in `nvim +1626 path/to/file.py` from the shell, `:edit +1626 path/to/file.py` inside the editor, or `gF` on a `path:line` reference in a buffer. Mason manages the compatible `tree-sitter-cli`; let initial parser installation finish to avoid repeated downloads. See [Neovim notes](nvim/README.md) for details.
 
 Neo-tree is intentionally not enabled. Use LazyVim's pickers for search and `<leader>e` (Space, then `e` by default) to open Yazi in a Snacks floating terminal at the project root; it closes and returns to Neovim when Yazi exits.
 

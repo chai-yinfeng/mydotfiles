@@ -26,6 +26,40 @@ Conform is configured for:
 
 C/C++ format-on-save remains disabled. Use `<leader>cf` to format a C/C++ buffer manually.
 
+## Markdown rendering
+
+Markdown files render inside the terminal with `render-markdown.nvim`. Use
+`<leader>um` (Space, then `u`, then `m`) or `:RenderMarkdown toggle` to toggle
+rendering. Insert mode and the cursor line show the source for editing.
+Treesitter's `markdown` and `markdown_inline` parsers come from LazyVim's core
+configuration. No browser is required.
+
+## Code locations from Codex
+
+Use Neovim's built-in commands; no custom location parser is configured:
+
+- From the shell: `nvim +1626 path/to/file.py`.
+- Inside Neovim: `:edit +1626 path/to/file.py`.
+- When `path/to/file.py:1626` appears in a buffer (including a terminal buffer),
+  place the cursor on the filename and press `gF` in Normal mode. `gf` opens the
+  file without using the line number. In a terminal buffer, first leave Terminal
+  mode with `<C-\\><C-n>`.
+
+For pasted references, use a scratch buffer (`:new`, then `:setlocal buftype=nofile
+bufhidden=wipe noswapfile`), paste the reference, press Escape, and use `gF` on
+the filename. Remove Markdown escape characters such as `\_` first. `:edit`
+does not interpret a `:line` suffix; use its `+line` argument instead. Relative
+paths depend on the current directory (`:pwd`); absolute paths avoid ambiguity.
+See `:help gF` and `:help +cmd` for the built-in behavior.
+
+## Treesitter installation
+
+Mason manages `tree-sitter-cli` and loads before Treesitter so an outdated system
+CLI cannot take precedence. A C compiler, `curl`, and `tar` are also required.
+The first launch installs missing parsers; allow installation to finish.
+For parser errors, run `:checkhealth nvim-treesitter` and inspect `:TSLog`.
+After updating the plugin, use `:TSUpdate` to rebuild compatible parsers.
+
 ## File navigation
 
 Neo-tree is intentionally not enabled. Use `<leader>e` (Space, then `e` by default) to run Yazi at the LazyVim project root in a Snacks floating terminal; the terminal closes when Yazi exits and returns to Neovim. From Zsh, `y` uses the shell wrapper. Yazi configuration lives under `../yazi/`.
