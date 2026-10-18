@@ -16,6 +16,7 @@ It is not intended to capture full machine provisioning, hardware drivers, host-
 - `tmux`
 - `neovim`
 - `yazi`
+- macOS package declarations in `Brewfile`
 
 ### Explicitly excluded from this repository
 - GPU drivers
@@ -32,6 +33,8 @@ It is not intended to capture full machine provisioning, hardware drivers, host-
 ## System baseline
 
 This configuration is used primarily on macOS arm64. Arch Linux and Ubuntu arm64 remain secondary compatibility environments; package names and tool locations differ, and this repository does not provision full machines.
+
+Compatibility depends on the distribution release, architecture, package versions, and executable names. Validate each target environment; macOS verification alone does not establish Linux compatibility.
 
 The primary macOS baseline assumes:
 
@@ -71,11 +74,17 @@ Current or intended tracked files:
 - `tmux/.tmux.conf`
 - `nvim/`
 - `yazi/`
+- `bat/`
+- `Brewfile` (macOS package manifest, not a configuration symlink)
 
 The exact directory layout may evolve, but the boundary remains the same:
 portable user configuration belongs here, machine-local operational state does not.
 
-The managed `~/.zshrc` links to `zsh/.zshrc` and optionally sources `~/.zshrc.local`. Link `nvim/` to `~/.config/nvim` and `yazi/` to `~/.config/yazi`; keep host-specific settings outside this repository.
+The managed `~/.zshrc` links to `zsh/.zshrc` and optionally sources `~/.zshrc.local`. Link `nvim/` to `~/.config/nvim`, `yazi/` to `~/.config/yazi`, and `bat/` to `~/.config/bat`; keep host-specific settings outside this repository.
+
+Track intentional configuration overrides, not copies of upstream defaults. Yazi's small configuration preserves the deliberate choice to show hidden files. `bat/config` selects Tokyo Night Moon (`tokyonight_moon`), automatic paging, and the full display style. `eza` continues to use its defaults.
+
+The configured `tokyonight_moon` bat theme is the unmodified [Tokyo Night Sublime export](https://github.com/folke/tokyonight.nvim/blob/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/sublime/tokyonight_moon.tmTheme), stored under `bat/themes/` with its upstream license. After linking `bat/` on a new machine, build the local cache with `bat cache --build` before using the custom default theme. Run `bat zsh/.zshrc` from the repository root to preview the configured defaults. Generated theme caches stay outside the repository.
 
 ---
 
@@ -135,6 +144,8 @@ The optional `~/.zshrc.local` holds host-specific setup such as Homebrew, Conda,
 
 ### Starship
 `starship` is used as the prompt layer because it separates prompt styling from shell logic.
+
+The tracked prompt uses the Tokyo Night preset's segmented layout, colors, Git indicators, language modules, and clock. The OS module is omitted; a hostname segment appears only in SSH sessions and trims the domain at the first dot. Use a Nerd Font for the preset's icons and separators. This is an editable preset snapshot, not automatic inheritance: regenerating the preset over this file would discard the hostname customization.
 
 Benefits:
 - cross-shell portability
@@ -228,10 +239,18 @@ It documents the tools expected to exist on a fresh system so the configuration 
 - `ripgrep`
 - `fd`
 - `fzf`
+- `jq`
+- `ast-grep`
+- `bat`
+- `eza`
 - `tree`
 - `htop`
 - `btop`
 - `yazi`
+- `uv`
+- `gh`
+
+Install CLI executables explicitly with the system package manager; `.zshrc` configures shell behavior but does not install them. `ripgrep` provides the `rg` command. Listing `fzf` here does not enable its optional shell key bindings or completion.
 
 ### Editor and editor support
 - `neovim`
@@ -285,10 +304,17 @@ These are documented for environment reconstruction but are not part of the port
 
 ## Example package installation commands
 
-### macOS arm64 shell tools
+### macOS arm64 (Homebrew)
 ```bash
-brew install starship zoxide zsh-autosuggestions zsh-syntax-highlighting yazi
+brew bundle install --no-upgrade --file=Brewfile
+brew bundle check --no-upgrade --file=Brewfile
 ```
+
+Run these manual commands from the repository root. `Brewfile` is the authoritative macOS package baseline: it declares explicitly selected tools, while Homebrew resolves their transitive dependencies. Installation does not run from `.zshrc`, create configuration symlinks, or enable optional shell integrations. `--no-upgrade` avoids requesting routine upgrades of existing tools; Homebrew may still update dependencies when necessary. Linux installation remains separate from this macOS manifest.
+
+Conda or another environment manager may put its own `jq` before Homebrew in `PATH`. Check `command -v jq`; use `"$(brew --prefix)/bin/jq"` when you specifically need the Homebrew-managed executable. Keep host-specific PATH configuration in `~/.zshrc.local`, not in the shared configuration.
+
+Keep Conda's shell hook available, but disable automatic environment activation on hosts where ordinary terminal work should use Homebrew tools: run `conda config --set auto_activate false` once, outside shell startup. New shells then require an explicit `conda activate <environment>`; use `conda deactivate` in already-open shells to leave an active environment. This is host-local Conda configuration, not a shared dotfile. Keep Conda-owned packages such as `jq` inside their environment rather than deleting their executables to resolve PATH precedence.
 
 ### Arch base user environment
 ```bash
@@ -303,7 +329,7 @@ sudo pacman -S noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-dejavu
 
 ### Arch Neovim toolchain
 ```bash
-sudo pacman -S clangd clang-format rust-analyzer
+sudo pacman -S clang rust-analyzer
 rustup component add clippy rustfmt
 ```
 
@@ -330,6 +356,8 @@ If a tool expects the `fd` command, add a user-local symlink:
 mkdir -p "$HOME/.local/bin"
 ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
 ```
+
+On Ubuntu 24.04, the `bat` package provides `batcat`, not `bat`. Use `batcat` directly or create a user-local `bat` symlink if a configured tool requires that name. Check package availability and versions for the target Ubuntu release before adding `eza` or `ast-grep`; do not copy Homebrew formula names blindly into APT commands.
 
 
 ### Ubuntu arm64 Yazi
@@ -406,7 +434,7 @@ These are intentionally excluded:
 
 ## Bootstrap philosophy
 
-This repository is not yet a full machine bootstrap system.
+This repository includes a macOS package manifest, but is not a full machine bootstrap system.
 Instead, it serves as:
 
 1. the canonical source for portable user-level config
@@ -415,8 +443,8 @@ Instead, it serves as:
 
 A typical rebuild flow is:
 
-1. install required system packages
-2. clone this repository
+1. clone this repository
+2. install required system packages (on macOS, use the Brewfile commands above)
 3. symlink standard configuration paths, including `~/.config/nvim` and `~/.config/yazi`, to the tracked files so repository edits take effect directly
 4. keep host-specific shell settings in `~/.zshrc.local`
 5. verify shell, prompt, tmux, and editor behavior
