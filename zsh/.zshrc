@@ -66,11 +66,22 @@ bindkey -e
 
 # -----------------------------
 # zoxide
-# A smarter directory jumper
-# Example: z project-name
+# Keep cd muscle memory while adding history-based jumps.
+# Example: cd project-name
 # -----------------------------
 if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh)"
+  eval "$(zoxide init --cmd cd zsh)"
+fi
+
+# Use familiar commands for interactive file viewing and directory listings.
+if command -v bat >/dev/null 2>&1; then
+  alias cat='bat'
+elif command -v batcat >/dev/null 2>&1; then
+  alias cat='batcat'
+fi
+
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza'
 fi
 
 # -----------------------------

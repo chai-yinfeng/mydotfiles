@@ -147,7 +147,7 @@ The active shell configuration uses Starship and standalone plugins; it does not
 - minimal and explicit configuration
 - readable prompt and command workflow
 - command history with duplicate control
-- no heavy alias-driven workflow
+- preserve familiar command names with a small set of guarded tool integrations
 - plugins used only for clearly scoped functionality
 - configuration that remains understandable months later
 
@@ -178,11 +178,18 @@ Benefits:
 - dedicated config file for appearance and prompt behavior
 
 ### zoxide
-`zoxide` is used as the directory-jumping tool.
+`zoxide` is initialized with `--cmd cd`, so `cd` handles ordinary paths and history-based directory jumps without requiring a separate `z` command. Use `builtin cd` when the original Zsh builtin behavior is required.
 
 Reason:
 - portable and modern replacement for older directory-jump tools
 - useful enhancement without changing the core command model too much
+
+### Familiar interactive commands
+
+The shared `.zshrc` aliases `cat` to `bat` (or `batcat` when that is the available executable) and `ls` to `eza`. `cat` therefore uses the tracked bat theme, full display style, and automatic paging. Each integration is enabled only when its tool is installed; otherwise the original command remains available.
+
+Use `command cat` and `command ls` to bypass the aliases, and `builtin cd` to bypass zoxide. These are interactive-shell conveniences, not fully compatible replacements for every native command option. Ordinary non-interactive scripts do not load `.zshrc` and retain their original command behavior. Open a new Zsh session or run `source ~/.zshrc` to load changes in an existing session.
+
 
 ### Autosuggestions and syntax highlighting
 These are provided by:
