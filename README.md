@@ -220,9 +220,9 @@ Configuration goals:
 
 ## Neovim
 
-The repository's `nvim/` directory contains a LazyVim Starter-based configuration linked to `~/.config/nvim`. Neovim 0.11.2 or newer is required; `nvim/lazy-lock.json` records plugin revisions and should be committed.
+The repository's `nvim/` directory contains a LazyVim Starter-based configuration linked to `~/.config/nvim`. Neovim 0.12.0 or newer is required; `nvim/lazy-lock.json` records plugin revisions and should be committed.
 
-Language extras are enabled in `nvim/lazyvim.json`: C/C++ (`clangd`), Go (`gopls`), Python (Pyright and Ruff), and Rust (rust-analyzer with Clippy). Lua support comes from LazyVim core. Mason installs configured language servers and selected formatters; Rust tools remain managed by the Rust toolchain.
+Language extras are enabled in `nvim/lazyvim.json`: C/C++ (`clangd`), Go (`gopls`), Python (Pyright and Ruff), and Rust (rust-analyzer with Clippy). Lua support comes from LazyVim core. Mason installs configured language servers and selected formatters; Linux arm64 uses the distro-provided clangd because Mason does not provide a compatible clangd binary. Rust tools remain managed by the Rust toolchain.
 
 Conform formats Lua with Stylua, Python with isort and Black, Go with goimports and gofumpt, and Rust with rustfmt. C/C++ uses clang-format on demand; format-on-save remains disabled for those filetypes.
 
@@ -380,7 +380,20 @@ sudo apt install nodejs npm python3 python3-pip python3-venv pipx
 sudo apt install clang clangd clang-format clang-tidy golang-go
 ```
 
-LazyVim requires Neovim 0.11.2 or newer. Check `nvim --version`; if the Ubuntu package is older, use a current Linux arm64 release from the [official downloads](https://github.com/neovim/neovim/releases/latest).
+The locked nvim-treesitter revision requires Neovim 0.12.0 or newer, even though LazyVim itself supports older versions. Check `nvim --version`; Ubuntu 26.04 currently provides 0.11.6, which does not satisfy this lockfile. Use a compatible stable Linux arm64 release from the [official downloads](https://github.com/neovim/neovim/releases/latest).
+
+For a system-wide upstream installation, download and verify the official archive, then install it under a versioned `/opt` directory. For example, with the verified 0.12.6 archive in the current directory:
+
+```bash
+sudo mkdir -p /opt/neovim-0.12.6
+sudo tar -xzf nvim-linux-arm64.tar.gz -C /opt/neovim-0.12.6 --strip-components=1
+sudo ln -s /opt/neovim-0.12.6/bin/nvim /usr/local/bin/nvim
+rehash # in Zsh; use hash -r in Bash
+command -v nvim
+nvim --version
+```
+
+Inspect an existing `/usr/local/bin/nvim` before replacing it. The version above is an installation example, not a global version pin. `/usr/local/bin/nvim` selects the upstream installation while `/usr/bin/nvim` remains owned by APT; do not overwrite APT-managed files or add the download directory to PATH. To revert, remove only the upstream symlink after verifying its target. Future upstream upgrades must be installed explicitly; APT does not update `/opt/neovim-*`.
 
 Install `starship` from the distro package if available, or from the upstream installer when the Ubuntu repository does not provide a current package.
 
@@ -404,7 +417,7 @@ sudo apt update && sudo apt install yazi
 ```
 
 ### Ubuntu arm64 Neovim language tooling
-LazyVim/Mason installs the configured language servers and formatters. Rust tools remain tied to the Rust toolchain:
+Install `clangd` with APT. On Linux arm64, the Neovim configuration disables Mason management for clangd and selects `/usr/bin/clangd` when present, preserving LazyVim's command-line flags. Other platforms keep Mason management. LazyVim/Mason installs the other configured language servers and formatters. Rust tools remain tied to the Rust toolchain:
 ```bash
 rustup component add rust-analyzer clippy rustfmt
 ```

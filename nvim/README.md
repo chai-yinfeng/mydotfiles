@@ -2,7 +2,7 @@
 
 This directory contains the repository-managed LazyVim configuration and is linked to `~/.config/nvim`. It uses the official LazyVim starter structure with local changes under `lua/config/` and `lua/plugins/`.
 
-LazyVim requires Neovim 0.11.2 or newer. Track `lazy-lock.json` so plugin revisions remain reproducible; review and commit lockfile changes after `:Lazy sync`.
+This configuration requires Neovim 0.12.0 or newer: the locked nvim-treesitter revision uses 0.12 APIs. LazyVim's own minimum version is not sufficient for this lockfile. Track `lazy-lock.json` so plugin revisions remain reproducible; review and commit lockfile changes after `:Lazy sync`.
 
 ## Language support
 
@@ -12,7 +12,9 @@ LazyVim requires Neovim 0.11.2 or newer. Track `lazy-lock.json` so plugin revisi
 - Go: gopls with gofumpt formatting and staticcheck analysis.
 - Lua: `lua_ls` and Stylua from LazyVim's core configuration.
 
-Language extras are declared in `lazyvim.json`; LazyVim/Mason installs the configured LSP servers and selected formatters, including `clang-format`. Rust's `rust-analyzer`, `rustfmt`, and `clippy` come from the Rust toolchain.
+Language extras are declared in `lazyvim.json`; LazyVim/Mason installs the configured LSP servers and selected formatters, including `clang-format`. On Linux arm64, Mason does not provide a compatible clangd binary. Install the distro `clangd` package; the configuration disables Mason management for that server and uses `/usr/bin/clangd` when present, retaining LazyVim's flags. Other platforms keep the upstream Mason behavior.
+
+Rust's `rust-analyzer`, `rustfmt`, and `clippy` come from the Rust toolchain.
 
 ## Formatting
 
@@ -54,7 +56,7 @@ See `:help gF` and `:help +cmd` for the built-in behavior.
 
 ## Treesitter installation
 
-Mason manages `tree-sitter-cli` and loads before Treesitter so an outdated system
+Mason manages `tree-sitter-cli` (0.26.1 or newer for the locked parser installer) and loads before Treesitter so an outdated system
 CLI cannot take precedence. A C compiler, `curl`, and `tar` are also required.
 The first launch installs missing parsers; allow installation to finish.
 For parser errors, run `:checkhealth nvim-treesitter` and inspect `:TSLog`.
